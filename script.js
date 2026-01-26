@@ -1,12 +1,37 @@
+const displayController = (function() {
+    const gameboardContainer = document.querySelector("#gameboard-container");
+
+    const renderGameboard = (arr) => {
+        gameboardContainer.innerHTML = "";
+
+        arr.forEach((item, index) => {
+            const gameCell = document.createElement("div");
+            gameCell.classList.add("game-cell");
+
+            if (item) {
+                gameCell.textContent = item;
+            }
+
+            gameCell.addEventListener("click", () => {
+                gameController.handleClick(index);
+            });
+
+            gameboardContainer.append(gameCell)
+        });
+    }
+
+    return {renderGameboard};
+})();
+
 const gameboard = (function () {
     let boardArray = Array(9).fill(null);
 
-    const displayBoard = () => {
-        console.log(`[${boardArray[0]}] [${boardArray[1]}] [${boardArray[2]}]\n[${boardArray[3]}] [${boardArray[4]}] [${boardArray[5]}]\n[${boardArray[6]}] [${boardArray[7]}] [${boardArray[8]}]`)
+    const initalDisplay = () => {
+        displayController.renderGameboard(boardArray);
     }
 
     const updateCell = (cell, symbol) => {
-        boardArray[cell-1] = symbol;
+        boardArray[cell] = symbol;
         displayController.renderGameboard(boardArray);
     }
 
@@ -31,61 +56,46 @@ const gameboard = (function () {
         )
     }
 
-    return { boardArray, updateCell, checkWin };
+    const isCellEmpty = (index) => {
+        return boardArray[index] === null;
+    }
+
+    return { initalDisplay, updateCell, checkWin, isCellEmpty };
 })();
 
 const gameController = (function() {
-    const player1 = createPlayer("Player 1", "X");
-    const player2 = createPlayer("Player 2", "O");
+    const player1 = createPlayer("X");
+    const player2 = createPlayer("O");
 
     let playerTurn = player1;
     let gameWon = false;
 
-    const playRound = (player) => {
-        gameboard.updateCell(player.getPlayerInput(), player.symbol);
-    }
+    gameboard.initalDisplay()
 
-    const playGame = () => {
-        while (!gameWon) {
-            playRound(playerTurn)
+    const handleClick = (index) => {
+
+        if (gameboard.isCellEmpty(index)) {
+            gameboard.updateCell(index, playerTurn.symbol);
             gameWon = gameboard.checkWin();
 
             if (gameWon) {
                 console.log(`Congratulations, ${playerTurn.name} won!`)
-            }
-            playerTurn = playerTurn === player1 ? player2 : player1;
+            };
+        
+            playerTurn = playerTurn === player1 ? player2 : player1;          
+        } else {
+            console.log("Please choose an empty cell");
         }
     }
 
-    return { playGame };
+    return { handleClick }; 
 })();
 
-const displayController = (function() {
-    const gameboardContainer = document.querySelector("#gameboard-container");
-
-    const renderGameboard = (arr) => {
-        gameboardContainer.innerHTML = "";
-
-        arr.forEach((item) => {
-            const gameCell = document.createElement("div");
-            gameCell.classList.add("game-cell");
-            if (item) {
-                gameCell.textContent = item;
-            }
-            gameboardContainer.append(gameCell)
-        });
-    }
-
-    return {renderGameboard};
-})();
-
-function createPlayer(name, symbol) {
+function createPlayer(symbol) {
     const getPlayerInput = () => {
         const playerInput = Number(prompt("What square do you want to play"));
         return playerInput;
     }
     
-    return { name, symbol, getPlayerInput };
+    return { symbol, getPlayerInput };
 }
-
-// add logic to prevent cell overwrite somewhere
