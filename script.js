@@ -1,10 +1,10 @@
 const displayController = (function() {
     const gameboardContainer = document.querySelector("#gameboard-container");
 
-    const renderGameboard = (arr) => {
+    const renderGameboard = (board, onCellClick) => {
         gameboardContainer.innerHTML = "";
 
-        arr.forEach((item, index) => {
+        board.forEach((item, index) => {
             const gameCell = document.createElement("div");
             gameCell.classList.add("game-cell");
 
@@ -12,9 +12,7 @@ const displayController = (function() {
                 gameCell.textContent = item;
             }
 
-            gameCell.addEventListener("click", () => {
-                gameController.handleClick(index);
-            });
+            gameCell.addEventListener("click", () => onCellClick(index));
 
             gameboardContainer.append(gameCell)
         });
@@ -26,13 +24,8 @@ const displayController = (function() {
 const gameboard = (function () {
     let boardArray = Array(9).fill(null);
 
-    const initalDisplay = () => {
-        displayController.renderGameboard(boardArray);
-    }
-
     const updateCell = (cell, symbol) => {
         boardArray[cell] = symbol;
-        displayController.renderGameboard(boardArray);
     }
 
     const allEqual = (index1, index2, index3) => {
@@ -60,27 +53,39 @@ const gameboard = (function () {
         return boardArray[index] === null;
     }
 
-    return { initalDisplay, updateCell, checkWin, isCellEmpty };
+    const isBoardFull = () => {
+        return !boardArray.includes(null);
+    }
+
+    return { boardArray, updateCell, checkWin, isCellEmpty, isBoardFull };
 })();
 
 const gameController = (function() {
-    const player1 = createPlayer("X");
-    const player2 = createPlayer("O");
+    const player1 = createPlayer("Player 1", "X");
+    const player2 = createPlayer("Player 2", "O");
 
     let playerTurn = player1;
-    let gameWon = false;
-
-    gameboard.initalDisplay()
+    let isGameOver = false;
 
     const handleClick = (index) => {
+        if (isGameOver) return;
 
         if (gameboard.isCellEmpty(index)) {
             gameboard.updateCell(index, playerTurn.symbol);
-            gameWon = gameboard.checkWin();
+            displayController.renderGameboard(gameboard.boardArray, handleClick);
 
-            if (gameWon) {
-                console.log(`Congratulations, ${playerTurn.name} won!`)
+            isGameOver = gameboard.checkWin();
+
+            if (isGameOver) {
+                console.log(`Congratulations, ${playerTurn.name} won!`);
+                return;
             };
+
+            if (gameboard.isBoardFull()) {
+                console.log("It's a tie!");
+                isGameOver = true;
+                return;
+            }
         
             playerTurn = playerTurn === player1 ? player2 : player1;          
         } else {
@@ -88,14 +93,11 @@ const gameController = (function() {
         }
     }
 
+    displayController.renderGameboard(gameboard.boardArray, handleClick);
+
     return { handleClick }; 
 })();
 
-function createPlayer(symbol) {
-    const getPlayerInput = () => {
-        const playerInput = Number(prompt("What square do you want to play"));
-        return playerInput;
-    }
-    
-    return { symbol, getPlayerInput };
+function createPlayer(name, symbol) {
+    return { name, symbol };
 }
