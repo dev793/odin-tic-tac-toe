@@ -1,0 +1,13 @@
+#gameboard-container {
+    display: grid;
+    grid-template-columns: 200px 200px 200px;
+    grid-template-rows: 200px 200px 200px;
+    text-align: center;
+}
+
+.game-cell {
+    background-color: lightgray;
+    border: 2px solid black;
+    font-size: 48px;
+    font-family: sans-serif;
+}

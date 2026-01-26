@@ -1,5 +1,5 @@
 const gameboard = (function () {
-    let boardArray = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let boardArray = Array(9).fill(null);
 
     const displayBoard = () => {
         console.log(`[${boardArray[0]}] [${boardArray[1]}] [${boardArray[2]}]\n[${boardArray[3]}] [${boardArray[4]}] [${boardArray[5]}]\n[${boardArray[6]}] [${boardArray[7]}] [${boardArray[8]}]`)
@@ -7,11 +7,15 @@ const gameboard = (function () {
 
     const updateCell = (cell, symbol) => {
         boardArray[cell-1] = symbol;
-        displayBoard();
+        displayController.renderGameboard(boardArray);
     }
 
     const allEqual = (index1, index2, index3) => {
-        return (boardArray[index1] === boardArray[index2] && boardArray[index2] === boardArray[index3]);
+        return (
+            boardArray[index1] === boardArray[index2] 
+            && boardArray[index2] === boardArray[index3]
+            && boardArray[index1] !== null
+        );
     }
 
     const checkWin = () => {
@@ -54,6 +58,25 @@ const gameController = (function() {
     }
 
     return { playGame };
+})();
+
+const displayController = (function() {
+    const gameboardContainer = document.querySelector("#gameboard-container");
+
+    const renderGameboard = (arr) => {
+        gameboardContainer.innerHTML = "";
+
+        arr.forEach((item) => {
+            const gameCell = document.createElement("div");
+            gameCell.classList.add("game-cell");
+            if (item) {
+                gameCell.textContent = item;
+            }
+            gameboardContainer.append(gameCell)
+        });
+    }
+
+    return {renderGameboard};
 })();
 
 function createPlayer(name, symbol) {
